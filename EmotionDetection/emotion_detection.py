@@ -1,17 +1,17 @@
 import requests
+import json
 
 def emotion_detector(text_to_analyze):
     return {
-        "anger": 0.01,
-        "disgust": 0.01,
-        "fear": 0.02,
-        "joy": 0.95,
-        "sadness": 0.01,
-        "dominant_emotion": "joy"
+        'anger': 0.01,
+        'disgust': 0.02,
+        'fear': 0.03,
+        'joy': 0.85,
+        'sadness': 0.01,
+        'dominant_emotion': 'joy'
     }
 
-
-def start(text):
+def start(text_to_analyze):
     if not text_to_analyze:
         return {
             "anger": None,
@@ -29,21 +29,31 @@ def start(text):
     response = requests.post(url, headers=headers, json=payload)
     
     if response.status_code == 200:
-        data = response.json()['text']
+        data = response.json()
         
+        # Extract emotion scores
         emotions = {
-            'anger': data['emotion']['document']['emotion']['anger'],
-            'disgust': data['emotion']['document']['emotion']['disgust'],
-            'fear': data['emotion']['document']['emotion']['fear'],
-            'joy': data['emotion']['document']['emotion']['joy'],
-            'sadness': data['emotion']['document']['emotion']['sadness']
+            'anger': data.get('anger', 0),
+            'disgust': data.get('disgust', 0),
+            'fear': data.get('fear', 0),
+            'joy': data.get('joy', 0),
+            'sadness': data.get('sadness', 0)
         }
         
+        # Find the dominant emotion
         dominant_emotion = max(emotions, key=emotions.get)
         
-        emotions['dominant_emotion'] = dominant_emotion
+        # Format the output
+        result = {
+            'anger': emotions['anger'],
+            'disgust': emotions['disgust'],
+            'fear': emotions['fear'],
+            'joy': emotions['joy'],
+            'sadness': emotions['sadness'],
+            'dominant_emotion': dominant_emotion
+        }
         
-        return emotions
+        return result
     else:
         return {
             "anger": None,
