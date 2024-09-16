@@ -1,32 +1,65 @@
-from flask import Flask, request, jsonify, render_template
-from EmotionDetection.emotion_detection import emotion_detector
+"""
+server.py
+
+This module sets up a Flask web application with several routes to demonstrate 
+basic functionality such as returning JSON responses, handling errors, and 
+searching for names in a predefined list.
+"""
+
+from flask import Flask, make_response, request
 
 app = Flask(__name__)
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    """Return a hello world message."""
+    return "hello world"
 
-@app.route("/emotionDetector", methods=['POST'])
-def emotion_detector_route():
-    text = request.json.get("text", "")
-    
-    if not text:
-        return jsonify({"message": "Invalid text! Please try again!"}), 400
-    
-    result = emotion_detector(text)
-    
-    if result.get('dominant_emotion') is None:
-        return jsonify({"message": "Invalid text! Please try again!"}), 400
+@app.route("/no_content")
+def no_content():
+    """Return 'no content found' with a status of 204.
 
-    response_message = (
-        f"For the given statement, the system response is "
-        f"anger: {result['anger']}, disgust: {result['disgust']}, "
-        f"fear: {result['fear']}, joy: {result['joy']} and "
-        f"sadness: {result['sadness']}. The dominant emotion is {result['dominant_emotion']}."
-    )
-    
-    return jsonify({"response": response_message}), 200
+    Returns:
+        tuple: A tuple containing a dictionary with the message and a status code of 204.
+    """
+    return {"message": "No content found"}, 204
+
+@app.route("/exp")
+def index_explicit():
+    """Return 'Hello World' message with a status code of 200.
+
+    Returns:
+        tuple: A tuple containing a dictionary with the message and a status code of 200.
+    """
+    resp = make_response({"message": "Hello World"})
+    resp.status_code = 200
+    return resp
+
+@app.route("/name_search")
+def name_search():
+    """Find a person in the database.
+
+    Returns:
+        dict: The person if found, with status of 200.
+        tuple: A dictionary with an error message and a status of 404 if not found.
+        tuple: A dictionary with an error message and a status of 422 if the 'q' parameter is missing.
+    """
+    data = [
+        {"first_name": "John", "last_name": "Doe"},
+        {"first_name": "Jane", "last_name": "Smith"},
+        {"first_name": "Alice", "last_name": "Johnson"}
+    ]
+
+    query = request.args.get("q")
+
+    if not query:
+        return {"message": "Invalid input parameter"}, 422
+
+    for person in data:
+        if query.lower() in person["first_name"].lower():
+            return person
+
+    return {"message": "Person not found"}, 404
 
 if __name__ == "__main__":
     app.run(debug=True)
