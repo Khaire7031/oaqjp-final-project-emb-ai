@@ -1,49 +1,49 @@
-"""
-server.py
-
-This module sets up a Flask web application with several routes to demonstrate 
-basic functionality such as returning JSON responses, handling errors, and 
-searching for names in a predefined list.
-"""
-
+# Import the Flask module and make_response function
 from flask import Flask, make_response, request
 
+# Create an instance of the Flask class
 app = Flask(__name__)
 
+# Define a route for the root URL ("/")
 @app.route("/")
 def index():
-    """Return a hello world message."""
     return "hello world"
 
+# Define a route for the "/no_content" URL
 @app.route("/no_content")
 def no_content():
-    """Return 'no content found' with a status of 204.
-
+    """Return 'no content found' with a status of 204
+    
     Returns:
-        tuple: A tuple containing a dictionary with the message and a status code of 204.
+        string: 'no content found' with 204 status code
     """
-    return {"message": "No content found"}, 204
+    return ({"message":"No content found"}, 204)
 
+# Define a route for the "/exp" URL
 @app.route("/exp")
 def index_explicit():
-    """Return 'Hello World' message with a status code of 200.
-
+    """Return 'Hello World' message with a status code of 200
+    
     Returns:
-        tuple: A tuple containing a dictionary with the message and a status code of 200.
+        string: 'Hello World'
+        status code: 200
     """
-    resp = make_response({"message": "Hello World"})
+    # Create a response object using make_response function
+    resp = make_response({"message":"Hello World"})
     resp.status_code = 200
     return resp
 
+# Define a route for the "/name_search" URL
 @app.route("/name_search")
 def name_search():
-    """Find a person in the database.
-
+    """Find a person in the database
+    
     Returns:
-        dict: The person if found, with status of 200.
-        tuple: A dictionary with an error message and a status of 404 if not found.
-        tuple: A dictionary with an error message and a status of 422 if the 'q' parameter is missing.
+        json: person if found, with status of 200
+        404: if not found
+        422: if argument q is missing
     """
+    # Get the value of the "q" query parameter
     data = [
         {"first_name": "John", "last_name": "Doe"},
         {"first_name": "Jane", "last_name": "Smith"},
@@ -52,14 +52,18 @@ def name_search():
 
     query = request.args.get("q")
 
+    # Check if the "q" parameter is missing
     if not query:
         return {"message": "Invalid input parameter"}, 422
 
+    # Search for the person in the database
     for person in data:
         if query.lower() in person["first_name"].lower():
             return person
 
-    return {"message": "Person not found"}, 404
+    # Return a 404 status code if the person is not found
+    return ({"message": "Person not found"}, 404)
 
-if __name__ == "__main__":
-    app.run(debug=True)
+# To run the server, use the following command
+# flask --app server --debug run
+# curl -X GET -i -w '\n' localhost:5000
