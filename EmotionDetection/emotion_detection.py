@@ -1,66 +1,66 @@
 import requests
 import json
 
-def emotion_detector(text_to_analyze):
-    return {
-        'anger': 0.85,        
-        'disgust': 0.10,      
-        'fear': 0.02,         
-        'joy': 0.01,          
-        'sadness': 0.02,      
-        'dominant_emotion': 'anger'
+def emotion_detector(text):
+    url = "https://sn-watson-emotion.labs.skills.network/v1/watson.runtime.nlp.v1/NlpService/EmotionPredict"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"  # Replace with your actual API key
     }
-
-
-def start(text_to_analyze):
-    if not text_to_analyze:
+    
+    if not text:
         return {
-            "anger": None,
-            "disgust": None,
-            "fear": None,
-            "joy": None,
-            "sadness": None,
-            "dominant_emotion": None
+            'anger': None,
+            'disgust': None,
+            'fear': None,
+            'joy': None,
+            'sadness': None,
+            'dominant_emotion': None
         }
     
-    url = 'https://sn-watson-emotion.labs.skills.network/v1/watson.runtime.nlp.v1/NlpService/EmotionPredict'
-    headers = {"grpc-metadata-mm-model-id": "emotion_aggregated-workflow_lang_en_stock"}
-    payload = {"raw_document": {"text": text_to_analyze}}
+    payload = {
+        "text": text
+    }
     
-    response = requests.post(url, headers=headers, json=payload)
-    
-    if response.status_code == 200:
-        data = response.json()
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        if response.status_code == 400:
+            return {
+                'anger': None,
+                'disgust': None,
+                'fear': None,
+                'joy': None,
+                'sadness': None,
+                'dominant_emotion': None
+            }
+        response_data = response.json()
+        anger_score = response_data.get('anger', 0)
+        disgust_score = response_data.get('disgust', 0)
+        fear_score = response_data.get('fear', 0)
+        joy_score = response_data.get('joy', 0)
+        sadness_score = response_data.get('sadness', 0)
         
-        # Extract emotion scores
         emotions = {
-            'anger': data.get('anger', 0),
-            'disgust': data.get('disgust', 0),
-            'fear': data.get('fear', 0),
-            'joy': data.get('joy', 0),
-            'sadness': data.get('sadness', 0)
+            'anger': anger_score,
+            'disgust': disgust_score,
+            'fear': fear_score,
+            'joy': joy_score,
+            'sadness': sadness_score
         }
         
-        # Find the dominant emotion
         dominant_emotion = max(emotions, key=emotions.get)
         
-        # Format the output
-        result = {
-            'anger': emotions['anger'],
-            'disgust': emotions['disgust'],
-            'fear': emotions['fear'],
-            'joy': emotions['joy'],
-            'sadness': emotions['sadness'],
+        return {
+            **emotions,
             'dominant_emotion': dominant_emotion
         }
-        
-        return result
-    else:
+    except Exception as e:
+        print(f"An error occurred: {e}")
         return {
-            "anger": None,
-            "disgust": None,
-            "fear": None,
-            "joy": None,
-            "sadness": None,
-            "dominant_emotion": None
+            'anger': None,
+            'disgust': None,
+            'fear': None,
+            'joy': None,
+            'sadness': None,
+            'dominant_emotion': None
         }
