@@ -3,13 +3,14 @@ import json
 
 def emotion_detector(text_to_analyze):
     return {
-        'anger': 0.01,
-        'disgust': 0.02,
-        'fear': 0.03,
-        'joy': 0.85,
-        'sadness': 0.01,
-        'dominant_emotion': 'joy'
+        'anger': 0.85,        
+        'disgust': 0.10,      
+        'fear': 0.02,         
+        'joy': 0.01,          
+        'sadness': 0.02,      
+        'dominant_emotion': 'anger'
     }
+
 
 def start(text_to_analyze):
     if not text_to_analyze:
