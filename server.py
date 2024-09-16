@@ -67,3 +67,6 @@ def name_search():
 # To run the server, use the following command
 # flask --app server --debug run
 # curl -X GET -i -w '\n' localhost:5000
+
+if __name__ == "__main__":
+    app.run(debug=True)
